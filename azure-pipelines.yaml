@@ -137,7 +137,7 @@ stages:
               displayName: 'Deploy Azure Web App'
               inputs:
                 azureSubscription: 'udacitydevopsserviceconnection'
-                appType: webApp
+                appType: 'webAppLinux'
                 appName: "udacity-qa-AppService"
                 package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
                 deploymentMethod: 'auto'
