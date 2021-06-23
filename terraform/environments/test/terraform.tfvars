@@ -21,4 +21,4 @@ admin_username = "udacity"
 #public_key_path = "~/.ssh/id_rsa.pub"
 
 # public key in Azure pipelines
-public_key_path = "/home/vsts/work/_temp/myKey.pub"
+public_key_path = "/home/vsts/work/_temp/id_rsa.pub"
