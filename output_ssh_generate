@@ -1,0 +1,21 @@
+mnjegovan@njegovan-laptop:~/Desktop/udacity_ensure_quality$ ssh-keygen -m PEM -t rsa -b 4096
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/njegovan/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/njegovan/.ssh/id_rsa
+Your public key has been saved in /home/njegovan/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:/glqJax3Hyoiyaa/a8l5kROB9yTosxxk6aMKbd+l3HM njegovan@njegovan-laptop
+The key's randomart image is:
++---[RSA 4096]----+
+|   +             |
+|  * + .          |
+| = . =           |
+|  * . .          |
+| + = +  S        |
+|o = + o.o        |
+|o+ = * *o .      |
+|. X = B.++Eo     |
+|.=+= +.o.++      |
++----[SHA256]-----+

@@ -1,0 +1,4 @@
+terraform/environments/test
+terraform/environments/test/.terraform
+terraform/environments/test/.terraform.lock.hcl
+backup

@@ -1,0 +1,93 @@
+njegovan@njegovan-laptop:~/Desktop/udacity_ensure_quality$ ./configure_storage_account.sh 
+{
+  "id": "/subscriptions/f8fe367c-c3dd-452f-846e-c2c9279efb29/resourceGroups/tstate",
+  "location": "eastus",
+  "managedBy": null,
+  "name": "tstate",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+{/ Finished ..
+  "accessTier": "Hot",
+  "allowBlobPublicAccess": null,
+  "allowSharedKeyAccess": null,
+  "azureFilesIdentityBasedAuthentication": null,
+  "blobRestoreStatus": null,
+  "creationTime": "2021-06-23T07:54:53.503734+00:00",
+  "customDomain": null,
+  "enableHttpsTrafficOnly": true,
+  "enableNfsV3": null,
+  "encryption": {
+    "encryptionIdentity": null,
+    "keySource": "Microsoft.Storage",
+    "keyVaultProperties": null,
+    "requireInfrastructureEncryption": null,
+    "services": {
+      "blob": {
+        "enabled": true,
+        "keyType": "Account",
+        "lastEnabledTime": "2021-06-23T07:54:53.613139+00:00"
+      },
+      "file": {
+        "enabled": true,
+        "keyType": "Account",
+        "lastEnabledTime": "2021-06-23T07:54:53.613139+00:00"
+      },
+      "queue": null,
+      "table": null
+    }
+  },
+  "extendedLocation": null,
+  "failoverInProgress": null,
+  "geoReplicationStats": null,
+  "id": "/subscriptions/f8fe367c-c3dd-452f-846e-c2c9279efb29/resourceGroups/tstate/providers/Microsoft.Storage/storageAccounts/tstate12507",
+  "identity": null,
+  "isHnsEnabled": null,
+  "kind": "StorageV2",
+  "largeFileSharesState": null,
+  "lastGeoFailoverTime": null,
+  "location": "eastus",
+  "minimumTlsVersion": null,
+  "name": "tstate12507",
+  "networkRuleSet": {
+    "bypass": "AzureServices",
+    "defaultAction": "Allow",
+    "ipRules": [],
+    "resourceAccessRules": null,
+    "virtualNetworkRules": []
+  },
+  "primaryEndpoints": {
+    "blob": "https://tstate12507.blob.core.windows.net/",
+    "dfs": "https://tstate12507.dfs.core.windows.net/",
+    "file": "https://tstate12507.file.core.windows.net/",
+    "internetEndpoints": null,
+    "microsoftEndpoints": null,
+    "queue": "https://tstate12507.queue.core.windows.net/",
+    "table": "https://tstate12507.table.core.windows.net/",
+    "web": "https://tstate12507.z13.web.core.windows.net/"
+  },
+  "primaryLocation": "eastus",
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "resourceGroup": "tstate",
+  "routingPreference": null,
+  "secondaryEndpoints": null,
+  "secondaryLocation": null,
+  "sku": {
+    "name": "Standard_LRS",
+    "tier": "Standard"
+  },
+  "statusOfPrimary": "available",
+  "statusOfSecondary": null,
+  "tags": {},
+  "type": "Microsoft.Storage/storageAccounts"
+}
+{
+  "created": true
+}
+storage_account_name: tstate12507
+container_name: tstate
+access_key: GWJd4NjLAr8VCG/vbosGADJI6AhvCjJuDmzF8+7z+N+mVF3crYUA6JJnV81WhVj+OR4ctAngYibnHxdnT6utXQ==

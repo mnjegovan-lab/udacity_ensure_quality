@@ -1,0 +1,17 @@
+az ad sp create-for-rbac --name="UdacityDevOpsCapstone" --role="Contributor" 
+
+
+njegovan@njegovan-laptop:~/Desktop/udacity_ensure_quality$ az ad sp create-for-rbac --name="UdacityDevOpsCapstone" --role="Contributor"
+Changing "UdacityDevOpsCapstone" to a valid URI of "http://UdacityDevOpsCapstone", which is the required format used for service principal names
+Creating 'Contributor' role assignment under scope '/subscriptions/f8fe367c-c3dd-452f-846e-c2c9279efb29'
+  Retrying role assignment creation: 1/36
+  Retrying role assignment creation: 2/36
+  Retrying role assignment creation: 3/36
+The output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli
+{
+  "appId": "fa1b61e3-97c7-4e4e-8583-7dfc7471f61c",
+  "displayName": "UdacityDevOpsCapstone",
+  "name": "http://UdacityDevOpsCapstone",
+  "password": "rHtf9WuigKkkgg1NiPOg30J~EKM2niyqhd",
+  "tenant": "1073b418-a5a8-4611-9af6-7eea8d22b54e"
+}
