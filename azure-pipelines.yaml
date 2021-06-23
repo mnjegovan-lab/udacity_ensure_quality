@@ -19,8 +19,8 @@ stages:
         steps:
           - task: InstallSSHKey@0
             inputs:
-              knownHostsEntry: 'SHA256:/glqJax3Hyoiyaa/a8l5kROB9yTosxxk6aMKbd+l3HM njegovan@njegovan-laptop'
-              sshPublicKey: '$(myPubKey)'
+              knownHostsEntry: 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+              sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop'
               sshKeySecureFile: 'id_rsa'
 
           - task: Bash@3
@@ -80,8 +80,8 @@ stages:
                 - task: AzureWebApp@1
                   displayName: "Deploy Azure Web App"
                   inputs:
-                    azureSubscription: "0ec1fc38-cf57-45c2-b0ee-101f2f6659e6"
-                    appName: "testautomation-appservice"
+                    azureSubscription: "f8fe367c-c3dd-452f-846e-c2c9279efb29"
+                    appName: "udacity-devops-capstone"
                     appType: webApp
                     package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
 
