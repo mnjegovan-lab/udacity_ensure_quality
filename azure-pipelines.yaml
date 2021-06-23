@@ -120,7 +120,7 @@ stages:
         steps:
         - task: Delay@1
           inputs:
-            delayForMinutes: '5'
+            delayForMinutes: '1'
 
   - stage: Deployments
     displayName: Deployments
