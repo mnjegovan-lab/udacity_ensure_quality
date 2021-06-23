@@ -136,16 +136,16 @@ stages:
             - task: AzureWebApp@1
               displayName: 'Deploy Azure Web App'
               inputs:
-                azureSubscription: 'AZServiceConnection'
-                appType: 'webAppLinux'
-                appName: $(applicationname)
+                azureSubscription: 'udacitydevopsserviceconnection'
+                appType: webApp
+                appName: "udacity-qa-AppService"
                 package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
                 deploymentMethod: 'auto'
 
     - deployment: VMDeploy
       displayName: VM Deploy
       environment:
-        name:  'VM-TEST'
+        name:  'TEST'
         resourceType: VirtualMachine
       strategy:
         runOnce:
@@ -342,7 +342,7 @@ stages:
           timeoutInMinutes: 80 # task times out in 80 minutes
           inputs:
             notifyUsers: |
-              jcdev@outlook.com
+              marko.njegovan@outlook.com
             instructions: 'Please validate the end of the Pipeline to destroy the Infraestructure'
             onTimeout: 'resume'
   
