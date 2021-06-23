@@ -18,7 +18,7 @@ address_prefix_test = "10.5.1.0/24"
 admin_username = "udacity"
 
 # public key on Linux local machine
-public_key_path = "~/.ssh/id_rsa.pub"
+#public_key_path = "~/.ssh/id_rsa.pub"
 
 # public key in Azure pipelines
-#public_key_path = "/home/vsts/work/_temp/myKey.pub"
+public_key_path = "/home/vsts/work/_temp/myKey.pub"
