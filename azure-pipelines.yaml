@@ -41,7 +41,7 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'init'
-          backendServiceArm: 'AZServiceConnection'
+          backendServiceArm: 'udacitydevopsserviceconnection'
           backendAzureRmResourceGroupName: 'tstate'
           backendAzureRmStorageAccountName: 'tstate12507'
           backendAzureRmContainerName: 'tstate'
@@ -54,7 +54,7 @@ stages:
           provider: 'azurerm'
           command: 'validate'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-          environmentServiceNameAzureRM: 'AZServiceConnection'
+          environmentServiceNameAzureRM: 'udacitydevopsserviceconnection'
       
       - task: TerraformTaskV1@0
         displayName: Terraform Plan
@@ -62,7 +62,7 @@ stages:
           provider: 'azurerm'
           command: 'plan'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-          environmentServiceNameAzureRM: 'AZServiceConnection'
+          environmentServiceNameAzureRM: 'udacitydevopsserviceconnection'
       
       - task: TerraformTaskV1@0
         displayName: Terraform Apply
@@ -72,7 +72,7 @@ stages:
           commandOptions: |
             -auto-approve
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-          environmentServiceNameAzureRM: 'AZServiceConnection'
+          environmentServiceNameAzureRM: 'udacitydevopsserviceconnection'
 
   - stage: Build
     jobs:
@@ -384,7 +384,7 @@ stages:
         inputs:
           provider: 'azurerm'
           command: 'init'
-          backendServiceArm: 'AZServiceConnection'
+          backendServiceArm: 'udacitydevopsserviceconnection'
           backendAzureRmResourceGroupName: 'tstate'
           backendAzureRmStorageAccountName: 'tstate12507'
           backendAzureRmContainerName: 'tstate'
@@ -399,4 +399,4 @@ stages:
           commandOptions: |
             -auto-approve
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
-          environmentServiceNameAzureRM: 'AZServiceConnection'
+          environmentServiceNameAzureRM: 'udacitydevopsserviceconnection'
