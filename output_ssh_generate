@@ -19,3 +19,7 @@ The key's randomart image is:
 |. X = B.++Eo     |
 |.=+= +.o.++      |
 +----[SHA256]-----+
+
+
+njegovan@njegovan-laptop:~/Desktop/udacity_ensure_quality$ cat ~/.ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop
