@@ -1,190 +1,402 @@
 name: Azure Pipelines
 variables:
   python.version: "3.7.6"
+  applicationname: 'udacity-qa-appservice'
 stages:
+  - stage: ProvisionIaC
+    displayName: Azure Resources Provisioning
+    jobs:
+    - job: Provision_Azure_IaC
+      displayName: Provision Azure IaC
+      pool:
+        vmImage: 'ubuntu-18.04'
+      steps:
+      - task: DownloadSecureFile@1
+        name: tfvardef
+        displayName: Download terraform.tfvars
+        inputs:
+          secureFile: 'terraform.tfvars'
+
+      # Needed for Terraform VM deployment
+      - task: InstallSSHKey@0
+        displayName: Security Access
+        inputs:
+          knownHostsEntry: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+          sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop'
+          sshKeySecureFile: 'id_rsa'
+      
+      - task: Bash@3
+        displayName: Copy terraform.tfvars
+        inputs:
+          targetType: 'inline'
+          script: cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test/
+      
+      - task: TerraformInstaller@0
+        displayName: Install Terraform
+        inputs:
+          terraformVersion: '0.14.8'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Init
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          backendServiceArm: 'AZServiceConnection'
+          backendAzureRmResourceGroupName: 'tstate'
+          backendAzureRmStorageAccountName: 'tstate12507'
+          backendAzureRmContainerName: 'tstate'
+          backendAzureRmKey: 'terraform.tfstate'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Validate
+        inputs:
+          provider: 'azurerm'
+          command: 'validate'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test''
+          environmentServiceNameAzureRM: 'AZServiceConnection'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Plan
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test''
+          environmentServiceNameAzureRM: 'AZServiceConnection'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Apply
+        inputs:
+          provider: 'azurerm'
+          command: 'apply'
+          commandOptions: |
+            -auto-approve
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test''
+          environmentServiceNameAzureRM: 'AZServiceConnection'
+
   - stage: Build
     jobs:
       - job: Build
         pool:
           name: Hosted Ubuntu 1604
         steps:
-          - task: InstallSSHKey@0
-            inputs:
-              knownHostsEntry: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
-              sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop'
-              sshKeySecureFile: 'id_rsa'
-
-          - task: Bash@3
-            displayName: "Run Postman tests"
-            inputs:
-              targetType: "inline"
-              script: |
-                #! /bin/bash
-                # ------------- Install Dependencies -------------
-                apt-get update
-                sudo apt-get upgrade -y --fix-missing
-                sudo npm install -g newman reporter
-                # ------------- Run Postman tests -------------
-                echo "Clearing tests folder"
-                sudo rm -rf newman/*
-                echo "Running Regression tests ..."
-                newman run postman/Regression_Tests.postman_collection.json -e postman/FakeRestAPI_Postman_environment.json --reporters cli,junit
-                echo "Running Data Validation tests ..."
-                newman run postman/Data_Validation_Tests.postman_collection.json -e postman/FakeRestAPI_Postman_environment.json --reporters cli,junit
-          - task: PublishTestResults@2
-            displayName: "Publish Test Results"
-            inputs:
-              testResultsFormat: "JUnit"
-              testResultsFiles: "newman/newman-*.xml"
+          #- task: InstallSSHKey@0
+          #  inputs:
+          #    knownHostsEntry: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
+          #    sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop'
+          #    sshKeySecureFile: "id_rsa"
 
           - task: ArchiveFiles@2
             displayName: "Archive FakeRestAPI"
             inputs:
-              rootFolderOrFile: "./fakerestapi"
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/fakerestapi"
               includeRootFolder: false
               archiveType: "zip"
-              archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip"
-          - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-            displayName: "Upload Package"
-            artifact: drop-fakerestapi
+              archiveFile: '$(Build.BuildId)-fakerestapi.zip'
+
+          - task: PublishPipelineArtifact@1
+            displayName: "Upload farestapi Package"
+            inputs:
+              targetPath: $(Build.BuildId)-fakerestapi.zip
+              artifactName: drop-fakerestapi
 
           - task: ArchiveFiles@2
-            displayName: "Archive Entire Project"
+            displayName: "Archive Selenium UI Tests"
             inputs:
-              rootFolderOrFile: "./"
-              includeRootFolder: true
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/selenium"
+              includeRootFolder: false
               archiveType: "zip"
-              archiveFile: "$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-project.zip"
-          - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-project.zip
-            displayName: "Upload Package"
-            artifact: drop-project
+              archiveFile: '$(Build.BuildId)/selenium-tests.zip'
+              replaceExistingArchive: true
+          - upload: $(Build.BuildId)/selenium-tests.zip
+            artifact: selenium
 
-  - stage: Deploy
+  - stage: Wait
+  # Delay further execution of a workflow by 5 minutes - to give time to add the VM to Pipeline Environment
+  # and confgure the omsagent from Log analytics in the VM too.
     jobs:
-      - deployment: FakeRestAPI
-        pool:
-          vmImage: "Ubuntu-18.04"
-        environment: "TEST"
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: AzureWebApp@1
-                  displayName: "Deploy Azure Web App"
-                  inputs:
-                    azureSubscription: "udacitydevopsserviceconnection"
-                    appName: "udacity-qa-AppService"
-                    appType: webApp
-                    package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+      - job: RunsOnServer
+        pool: Server
+        steps:
+        - task: Delay@1
+          inputs:
+            delayForMinutes: '5'
 
-      - deployment: VMDeploy
-        displayName: CITesting
-        environment:
-          name: CITESTING
-          resourceType: VirtualMachine
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    artifact: "drop-project"
-                    path: $(Build.SourcesDirectory)
+  - stage: Deployments
+    displayName: Deployments
+    jobs:
+    - deployment: FakeRestAPIDeploy
+      pool:
+        vmImage: 'Ubuntu-18.04'
+      environment: 'TEST'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: AzureWebApp@1
+              displayName: 'Deploy Azure Web App'
+              inputs:
+                azureSubscription: 'AZServiceConnection'
+                appType: 'webAppLinux'
+                appName: $(applicationname)
+                package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
+                deploymentMethod: 'auto'
 
-                - task: Bash@3
-                  displayName: "Install Dependencies"
-                  inputs:
-                    targetType: "inline"
-                    script: |
-                      #! /bin/bash
-                      # ------------- Install Dependencies -------------
-                      sudo apt update && sudo apt upgrade -y
-                      sudo apt install python3-pip -y
-                      sudo apt install unzip -y
-                      sudo apt install -y chromium-browser
-                      pip3 install selenium
-                      # ------------- Install Jmeter -------------
-                      if test -f "/usr/bin/jmeter"
-                      then
-                        echo 'Jmeter already installed'
-                      else
-                        echo "Changing directory to /home/udacity ..."
-                        cd /home/udacity                        
-                        echo "Downloading Jmeter ..."
-                        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.3.tgz
-                        echo "Unpacking jmeter tgz ..."
-                        tar -xzvf apache-jmeter-5.3.tgz
-                        echo "Create symlink to jmeter bin file"
-                        sudo ln -s /home/udacity/apache-jmeter-5.3/bin/jmeter /usr/bin/jmeter
-                        echo "Removing jmeter tgz ..."
-                        sudo rm -rf apache-jmeter-5.3.tgz
-                      fi
-                      # ------------- Install Chromedriver -------------
-                      if test -f "usr/bin/chromedriver"
-                      then
-                        echo 'Chromedriver is already installed'
-                      else
-                        echo "Changing directory to /home/udacity ..."
-                        cd /home/udacity        
-                        wget https://chromedriver.storage.googleapis.com/85.0.4183.87/chromedriver_linux64.zip
-                        unzip chromedriver_linux64.zip
-                        sudo mv chromedriver -t /usr/bin
-                        echo "Removing chromedriver_linux64.zip ..."
-                        rm -rf chromedriver_linux64.zip
-                      fi
-                      if test -f "usr/bin/java"
-                      then
-                        echo "JRE is already installed"
-                      else
-                        echo "Install default JRE ..."
-                        sudo apt install default-jre -y
-                      fi
-                - task: ExtractFiles@1
-                  inputs:
-                    archiveFilePatterns: "$(Pipeline.Workspace)/drop-project/$(Build.BuildId)-project.zip"
-                    destinationFolder: "$(Pipeline.Workspace)/project"
-                    cleanDestinationFolder: true
+    - deployment: VMDeploy
+      displayName: VM Deploy
+      environment:
+        name:  'VM-TEST'
+        resourceType: VirtualMachine
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: Bash@3
+              displayName: 'Install Dependencies'
+              inputs:
+                targetType: 'inline'
+                script: |
+                  #! /bin/bash
+                  
+                  # sudo apt-get upgrade -y
+                  # sudo apt-get install python3-pip -y
+                  # sudo apt-get install unzip -y
+                  # sudo apt-get install -y chromium-browser
+                  # pip3 install selenium
+                  
+                  # download chrome driver v89
+                  FILE=chromedriver_linux64.zip
+                  if [ -f "$FILE" ]; then
+                    echo "$FILE exists."
+                  else
+                    wget https://chromedriver.storage.googleapis.com/89.0.4389.23/chromedriver_linux64.zip
+                  fi
+                  # install chrome driver
+                  unzip chromedriver_linux64.zip
+                  sudo mv chromedriver /usr/bin/chromedriver
+                  sudo chown root:root /usr/bin/chromedriver
+                  sudo chmod +x /usr/bin/chromedriver
+                  chromium-browser -version
+                  chromedriver --version
+                  # agent log analytics
+                  wget https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh && sh onboard_agent.sh -w ba2f2875-7939-40f7-8fab-9fdfe5774935 -s rb9iiVdW/SUHbVCH4V83NX16EgaXKTEtX7WfGSxykJ3iCaZ/Tm/FFqigsvOAUajQZM0L5k9vAnyM3lD4Iv61cw==
+                  sudo /opt/microsoft/omsagent/bin/service_control restart ba2f2875-7939-40f7-8fab-9fdfe5774935
+            - download: current
+              displayName: 'Download Selenium'
+              artifact: selenium
+            - task: Bash@3
+              displayName: UI Tests
+              inputs:
+                targetType: 'inline'
+                script: |
+                  unzip -o $(Pipeline.Workspace)/selenium/selenium-tests.zip -d .
+                  sudo mkdir /var/logs
+                  python3 uitests.py > ui-logs.log
+                  sudo mv ui-logs.log /var/logs
+                  
+  - stage: IntegrationTests
+    displayName: Integration Tests
+    jobs:
+    - job: PostmanTests
+      displayName: Postman Tests
+      steps: 
+      - task: NodeTool@0
+        displayName: Install Node v14.X
+        inputs:
+          versionSpec: '14.x'
+          checkLatest: true
+      - task: CmdLine@2
+        displayName: Install Newman
+        inputs:
+          script: 'npm install newman'
+          workingDirectory: '$(System.DefaultWorkingDirectory)'
+      - task: CmdLine@2
+        displayName: Run Regression Tests
+        inputs:
+          script: 'newman run postman/Regression_Test_Suite.postman_collection.json -e postman/Test_Suite.postman_environment.json --delay-request 5000 --bail newman -x --reporters cli,junit --reporter-junit-export Results/RegressionTests.xml --suppress-exit-code'
+          workingDirectory: '$(System.DefaultWorkingDirectory)'
+        continueOnError: true
+      - task: CmdLine@2
+        displayName: Run Data Validation Tests
+        inputs:
+          script: 'newman run postman/Data_Validation_Test_Suite.postman_collection.json -e postman/Data_Validation_Test_Suite.postman_environment.json --delay-request 5000 --bail newman -x --reporters cli,junit --reporter-junit-export Results/DataValidationTests.xml --suppress-exit-code'
+          workingDirectory: '$(System.DefaultWorkingDirectory)'
+        continueOnError: true
+      - task: CmdLine@2
+        inputs:
+          script: 'ls -la ./Results/'
+          workingDirectory: '$(System.DefaultWorkingDirectory)'
+      - task: PublishTestResults@2
+        displayName: Publish Test Reports
+        condition: always()
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '$(System.DefaultWorkingDirectory)/Results/*.xml'
 
-                - task: Bash@3
-                  displayName: "Run Selenium tests"
-                  inputs:
-                    targetType: "inline"
-                    script: |
-                      #! /bin/bash
-                      # ------------- Run Selenium tests -------------
-                      cd ..
-                      if test -f '/var/logs/selenium/selenium_log.txt'
-                      then
-                        sudo chmod 777 /var/logs/selenium/selenium_log.txt
-                        python3 project/s/selenium/selenium_test.py
-                      else
-                        echo "Creating selenium log file"
-                        sudo mkdir -p /var/logs/selenium
-                        sudo touch /var/logs/selenium/selenium_log.txt
-                        sudo chmod 775 -R /var/logs      
-                        sudo chmod 777 /var/logs/selenium/selenium_log.txt                  
-                        echo "Running selenium tests ..."
-                        python3 project/s/selenium/selenium_test.py
-                      fi
-                - task: Bash@3
-                  displayName: "Run Jmeter tests"
-                  inputs:
-                    targetType: "inline"
-                    script: |
-                      #! /bin/bash
-                      # --------- Preparing to run Jmeter tests HTML report dirs -------------
-                      echo "Changing into Project jmeter dir ..."
-                      cd $(Pipeline.Workspace)/project/s/jmeter
-                      echo "Creating HTML report directories ..."
-                      mkdir stress_test_html_report endurance_test_html_report
-                      echo "Clearing previous results and html reports ..."
-                      rm -rf *.csv stress_test_html_report/* endurance_test_html_report/*
-                      echo "Preparing to run Jmeter tests ..."
-                      # --------- Run stress test --------------
-                      echo "Running stress test ..."
-                      jmeter -n -t stress_test_suite.jmx -l stress_test_result.csv -e -o stress_test_html_report/
-                      echo "HTML report written to -----> jmeter/stress_test_html_report"
-                      # --------- Run endurance test --------------
-                      echo "Running endurance test ..."
-                      jmeter -n -t endurance_test_suite.jmx -l endurance_test_results.csv -e -o endurance_test_html_report/
-                      echo "HTML report written to -----> jmeter/endurance_test_html_report"
+  - stage: JMeterTests
+    displayName: JMeter Tests
+    jobs:
+    - job: JMETERTests
+      displayName: Test JMeter
+      pool:
+        vmImage: 'ubuntu-18.04'
+      steps:
+      - bash: |
+          sudo apt-get install openjdk-11-jre-headless -y
+          java -version
+          wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.tgz -O jmeter.tgz
+          tar xzvf jmeter.tgz
+          apache-jmeter-5.4/bin/jmeter --version
+          # create log directory
+          mkdir -p log/jmeter
+          pwd
+          ls -la
+        displayName: Install JMeter
+      - bash: |
+          apache-jmeter-5.4/bin/jmeter -n -t jmeter/StressTestSuitev2.jmx \
+                                       -l log/jmeter/stress-test-result.csv \
+                                       -e -f -o log/jmeter/stress-test-html-report \
+                                       -j log/jmeter/jmeter-stress-test.log
+        displayName: JMeter stress test
+      - bash: |
+          apache-jmeter-5.4/bin/jmeter -n -t jmeter/EnduranceTestSuitev2.jmx \
+                                       -l log/jmeter/endurance-test-result.csv \
+                                       -e -f -o log/jmeter/endurance-test-html-report \
+                                       -j log/jmeter/jmeter-endurance-test.log
+        displayName: JMeter endurance test
+      - task: ArchiveFiles@2
+        displayName: Archive JMeter stress test HTML report
+        inputs:
+          rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/stress-test-html-report'
+          includeRootFolder: false
+          archiveType: 'zip'
+          archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/stress-test-html-report-$(Build.BuildId).zip'
+          verbose: true
+      - task: ArchiveFiles@2
+        displayName: Archive JMeter endurance test HTML report
+        inputs:
+          rootFolderOrFile: '$(System.DefaultWorkingDirectory)/log/jmeter/endurance-test-html-report'
+          includeRootFolder: false
+          archiveType: 'zip'
+          archiveFile: '$(System.DefaultWorkingDirectory)/log/jmeter/endurance-test-html-report-$(Build.BuildId).zip'
+          verbose: true
+      - bash: |
+          rm -rf log/jmeter/stress-test-html-report
+          rm -rf log/jmeter/endurance-test-html-report
+          cd log/jmeter
+          pwd
+          ls -la
+        displayName: Delete original JMeter test HTML reports
+      - task: PublishPipelineArtifact@1
+        displayName: Publish JMeter logs
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/log/jmeter'
+          artifactName: 'drop-jmeter-logs'
+
+  - stage: UITests
+    displayName: UI Tests - Selenium
+    jobs:
+    - deployment: VMRunUITests
+      displayName: Run UI Tests
+      environment:
+        name:  'VM-TEST'
+        resourceType: VirtualMachine
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - download: current
+              displayName: 'Download Selenium'
+              artifact: selenium
+            - task: Bash@3
+              displayName: Selenium UI Tests
+              inputs:
+                targetType: 'inline'
+                script: |
+                  unzip -o $(Pipeline.Workspace)/selenium/selenium-tests.zip -d .
+                  sudo mkdir -p /var/log/selenium
+                  sudo chmod 664 /var/log/selenium
+                  
+                  sudo python3 -u uitests.py 2>&1 | sudo tee -a /var/log/selenium/selenium-test.log
+                  # copy selenium log file to $(System.DefaultWorkingDirectory)/log/selenium/
+                  cd $(System.DefaultWorkingDirectory)
+                  mkdir -p log/selenium
+                  pwd
+                  sudo cp /var/log/selenium/selenium-test.log log/selenium/selenium-test.log
+                  ls -la
+            - task: PublishPipelineArtifact@1
+              displayName: Publish selenium logs
+              inputs:
+                targetPath: '$(System.DefaultWorkingDirectory)/log/selenium/selenium-test.log'
+                artifactName: 'drop-selenium-logs'
+
+  - stage: WaitUserApproval
+    displayName: User Approval
+    jobs:
+      - job: waitForValidation
+        displayName: Wait for external validation
+        pool: server
+        timeoutInMinutes: 90 # job times out in 90 minutes
+        steps:
+        - task: ManualValidation@0
+          timeoutInMinutes: 80 # task times out in 80 minutes
+          inputs:
+            notifyUsers: |
+              jcdev@outlook.com
+            instructions: 'Please validate the end of the Pipeline to destroy the Infraestructure'
+            onTimeout: 'resume'
+  
+  - stage: DestroyIaC
+    displayName: Destroy IaC
+    jobs:
+    - job: Destroy_Azure_IaC
+      displayName: Destroy Azure IaC
+      pool:
+        vmImage: 'ubuntu-18.04'
+      steps:
+      - task: DownloadSecureFile@1
+        name: tfvardef
+        displayName: Download terraform.tfvars
+        inputs:
+          secureFile: 'terraform.tfvars'
+
+      # Needed for Terraform VM deployment
+      - task: InstallSSHKey@0
+        displayName: Security Access
+        inputs:
+          knownHostsEntry: 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
+          sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjQMNlv1vrJ8vLByhhWxhf8F4gk8pCamdwULT7niMT3FKjnPlNHDEpVmUi8qQObbfYWsTdPiPK/oPUJWAZ0TtbkHRjjhcaLNb7im9GyWUTrZegVf8zNcL6QKDbWzu+Q9/5HpTwDmD+q+2jkfjHWMGKLLlS7w/z9NXzPBQUu2xCgsxrTQiK13avc9OB3aeGIPWStVy74XKlOzmpU/qSTCPtzazozl2208viy1fjvXzyK/GNuiTdQ+/JS7iiMGxkIToNzXBi8hSU2yeGEjFdgS+W/IBYdyiL7/Ug/WptbAUsQJ1fT9RVoKdOKG1OPRn0d/ik4g3sSUiLSvQcKhVx8GcivKDJcvLTj7WYmGNuvY+CIeWMaXmnyhybKV9QxQPLGOo4vMDjcZ2K/RrM4BUh6NR30wQMbAq5Hwd8CDK516XlwBmpw1IgKjlLobZJn9oWascqxepn3njcLgMtu8KLRW8QiIAGq8jAi8JdyoKiJABYHP/5IrOIHjnLgv0NqcAfstSa4noaVKqrgpPTOnDUQxKYZUxb5b0KMOupCG3t5ktkDKHVZWHSOasFP0JC5xzmktqbRPyJj4SRWD4/GncqMujNrzJCD+Le40B1xIKMDvgHbUTzLcUYpbiR5+tKYAuH1Uyzecx+5VcgQiQMvPrnI5Gz2KD+qNHsWRBkIWdWMWOk+w== njegovan@njegovan-laptop'
+          sshKeySecureFile: 'id_rsa'
+      
+      - task: Bash@3
+        displayName: Copy terraform.tfvars
+        inputs:
+          targetType: 'inline'
+          script: cp $(Agent.TempDirectory)/terraform.tfvars $(System.DefaultWorkingDirectory)/terraform/environments/test
+      
+      - task: TerraformInstaller@0
+        displayName: Install Terraform
+        inputs:
+          terraformVersion: '0.14.8'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Init
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          backendServiceArm: 'AZServiceConnection'
+          backendAzureRmResourceGroupName: 'tstate'
+          backendAzureRmStorageAccountName: 'tstate12507'
+          backendAzureRmContainerName: 'tstate'
+          backendAzureRmKey: 'terraform.tfstate'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+      
+      - task: TerraformTaskV1@0
+        displayName: Terraform Destroy
+        inputs:
+          provider: 'azurerm'
+          command: 'destroy'
+          commandOptions: |
+            -auto-approve
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+          environmentServiceNameAzureRM: 'AZServiceConnection'
