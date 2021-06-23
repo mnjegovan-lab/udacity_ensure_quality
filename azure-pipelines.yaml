@@ -21,7 +21,8 @@ stages:
               script: |
                 #! /bin/bash
                 # ------------- Install Dependencies -------------
-                sudo apt-get upgrade -y
+                apt-get update
+                sudo apt-get upgrade -y --fix-missing
                 sudo npm install -g newman reporter
                 # ------------- Run Postman tests -------------
                 echo "Clearing tests folder"
